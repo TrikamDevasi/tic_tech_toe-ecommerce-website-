@@ -105,7 +105,14 @@ export async function getRecommendations(sessionId, productId, context = {}, abV
         if (mlRes.ok) {
           const data = await mlRes.json();
           if (data.recommendations?.length > 0) {
-            const products = await Product.find({ _id: { $in: data.recommendations } }).limit(8);
+            const recIds = data.recommendations;
+            const numericIds = recIds.map(Number).filter(n => !isNaN(n));
+            const products = await Product.find({
+              $or: [
+                { id: { $in: numericIds } },
+                { id: { $in: recIds.map(String) } }
+              ]
+            }).limit(8);
             if (products.length > 0) {
               return products.map(p => ({ ...p.toObject(), _recReason: `ml-${data.model || 'gru4rec'}` }));
             }
@@ -129,9 +136,8 @@ export async function getRecommendations(sessionId, productId, context = {}, abV
       ? await redisLRange(`viewed:${sessionId}`, 0, 9) 
       : [];
     
-    // Map numerical IDs back to MongoDB ObjectIDs for the ML service
-    const viewedProducts = all.filter(p => viewedRaw.map(Number).includes(p.id));
-    const sessionHistory = viewedProducts.map(p => p._id.toString());
+    // Canonical product IDs (numeric or string) from Redis session history
+    const sessionHistory = viewedRaw.filter(Boolean);
 
     if (sessionHistory.length > 0) {
       const mlRes = await fetch(`${mlUrl}/recommend/session`, {
@@ -142,7 +148,8 @@ export async function getRecommendations(sessionId, productId, context = {}, abV
       });
       if (mlRes.ok) {
         const { recommendations: recIds } = await mlRes.json();
-        const mlProducts = all.filter(p => recIds.includes(p._id.toString()) && !exclude.has(p.id));
+        const recStrSet = new Set((recIds || []).map(String));
+        const mlProducts = all.filter(p => recStrSet.has(String(p.id)) && !exclude.has(p.id));
         mlProducts.forEach(p => {
           result.push({ ...p, _recReason: 'ml-personalized' });
           exclude.add(p.id);
@@ -150,17 +157,15 @@ export async function getRecommendations(sessionId, productId, context = {}, abV
       }
     } else if (productId) {
       // Fallback: recommend by product ID if no session history
-      const mongoId = current?._id.toString();
-      if (mongoId) {
-        const mlRes = await fetch(`${mlUrl}/recommend/${mongoId}?top_k=10`, { signal: AbortSignal.timeout(1000) });
-        if (mlRes.ok) {
-          const { recommendations: recIds } = await mlRes.json();
-          const mlProducts = all.filter(p => recIds.includes(p._id.toString()) && !exclude.has(p.id));
-          mlProducts.forEach(p => {
-            result.push({ ...p, _recReason: 'ml-content' });
-            exclude.add(p.id);
-          });
-        }
+      const mlRes = await fetch(`${mlUrl}/recommend/${productId}?top_k=10`, { signal: AbortSignal.timeout(1000) });
+      if (mlRes.ok) {
+        const { recommendations: recIds } = await mlRes.json();
+        const recStrSet = new Set((recIds || []).map(String));
+        const mlProducts = all.filter(p => recStrSet.has(String(p.id)) && !exclude.has(p.id));
+        mlProducts.forEach(p => {
+          result.push({ ...p, _recReason: 'ml-content' });
+          exclude.add(p.id);
+        });
       }
     }
   } catch (err) {

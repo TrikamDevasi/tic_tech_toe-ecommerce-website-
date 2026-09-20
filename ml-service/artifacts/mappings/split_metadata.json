@@ -1,0 +1,31 @@
+{
+  "train_sequences": 1400,
+  "val_sequences": 300,
+  "test_sequences": 300,
+  "vocab_size": 217,
+  "num_items": 215,
+  "is_synthetic": false,
+  "data_quality": {
+    "total_events": 98571,
+    "valid_events": 98570,
+    "invalid_events": 1,
+    "unknown_product_events": 0,
+    "missing_session_events": 0,
+    "missing_timestamp_events": 0,
+    "duplicate_events": 1,
+    "total_sessions": 2000,
+    "usable_sessions": 2000,
+    "total_interactions": 98097,
+    "unique_products": 215,
+    "avg_session_length": 49.05,
+    "median_session_length": 49.0,
+    "max_session_length": 77,
+    "event_type_distribution": {
+      "page_view": 77039,
+      "add_to_cart": 14411,
+      "wishlist_add": 4792,
+      "purchase": 2328
+    },
+    "is_synthetic": false
+  }
+}

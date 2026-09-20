@@ -31,6 +31,37 @@ interface DashboardMetrics {
   };
 }
 
+interface LatencyMetrics {
+  p50: number;
+  p99: number;
+  avg: number;
+  count: number;
+  quality: { ndcg: number; hitRate: number };
+}
+
+interface InventoryPrediction {
+  name: string;
+  dailyVelocity: number;
+  currentStock: number;
+  daysRemaining: number;
+  critical: boolean;
+}
+
+interface FairnessFactor {
+  factor: string;
+  description?: string;
+  reason?: string;
+}
+
+interface FairnessAudit {
+  auditNote: string;
+  pricingFactors?: FairnessFactor[];
+  excludedFactors?: FairnessFactor[];
+  segmentBasis?: string;
+  segmentDistribution?: { value_seeker: number; standard: number; premium_intent: number };
+  lastAudited: string;
+}
+
 const EMPTY_METRICS: DashboardMetrics = {
   totalRevenue: { value: 0, change: 0 },
   conversionRate: { overall: 0, control: 0, treatment: 0 },
@@ -56,9 +87,9 @@ export default function Dashboard() {
   const [marketplaceHistory, setMarketplaceHistory] = useState<MktProduct[]>([]);
   const [historyLoading, setHistoryLoading]         = useState(true);
 
-  const [latency, setLatency] = useState<any>(null);
-  const [predictions, setPredictions] = useState<any[]>([]);
-  const [fairness, setFairness] = useState<any>(null);
+  const [latency, setLatency] = useState<LatencyMetrics | null>(null);
+  const [predictions, setPredictions] = useState<InventoryPrediction[]>([]);
+  const [fairness, setFairness] = useState<FairnessAudit | null>(null);
 
   const LINE_COLORS = ['#f97316', '#3b82f6', '#22c55e', '#ec4899', '#eab308'];
 
@@ -598,7 +629,7 @@ export default function Dashboard() {
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-success mb-3">Included Factors (Behavioral)</h3>
               <ul className="space-y-2">
-                {fairness.pricingFactors?.map((f: any) => (
+                {fairness.pricingFactors?.map((f) => (
                   <li key={f.factor} className="flex items-start gap-2 text-sm">
                     <CheckCircle size={14} className="text-success mt-0.5" />
                     <div>
@@ -611,7 +642,7 @@ export default function Dashboard() {
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-destructive mb-3">Excluded Factors (Demographic)</h3>
               <ul className="space-y-2">
-                {fairness.excludedFactors?.map((f: any) => (
+                {fairness.excludedFactors?.map((f) => (
                   <li key={f.factor} className="flex items-start gap-2 text-sm">
                     <AlertCircle size={14} className="text-destructive mt-0.5" />
                     <div>

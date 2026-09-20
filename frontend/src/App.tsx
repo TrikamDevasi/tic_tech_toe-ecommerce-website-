@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -22,64 +22,75 @@ import SearchResults from "@/pages/SearchResults";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import AuthCallback from "@/pages/AuthCallback";
+import Landing from "@/pages/Landing";
 import { useState } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+const SiteRoutes = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const { pathname } = useLocation();
+  const isMarketingPage = pathname === "/";
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <ProductProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <TooltipProvider>
-                  <Sonner />
-                  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                    <ScrollToTop />
-                    <div className="flex flex-col min-h-screen">
+    <>
+      <ScrollToTop />
+      <div className={isMarketingPage ? "min-h-screen" : "flex min-h-screen flex-col"}>
+        {!isMarketingPage && (
+          <>
                       <Navbar
                         searchQuery={searchQuery}
                         onSearchChange={setSearchQuery}
                         activeCategory={activeCategory}
                         onCategoryChange={setActiveCategory}
                       />
-                      <main className="flex-1">
-                        <Routes>
-                          {/* Public routes */}
-                          <Route path="/" element={<Home searchQuery={searchQuery} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />} />
-                          <Route path="/search" element={<SearchResults />} />
-                          <Route path="/product/:id" element={<ProductDetail />} />
-                          <Route path="/cart" element={<Cart />} />
-                          <Route path="/wishlist" element={<Wishlist />} />
-                          <Route path="/login" element={<Login />} />
-                          <Route path="/signup" element={<Signup />} />
-                          <Route path="/auth/callback" element={<AuthCallback />} />
+          </>
+        )}
+        <main className={isMarketingPage ? undefined : "flex-1"}>
+          <Routes>
+            {/* Marketing route */}
+            <Route path="/" element={<Landing />} />
 
-                          {/* Protected routes */}
-                          <Route path="/dashboard" element={
-                            <ProtectedRoute><Dashboard /></ProtectedRoute>
-                          } />
+            {/* Existing storefront and application routes */}
+            <Route path="/shop" element={<Home searchQuery={searchQuery} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />} />
+            <Route path="/search" element={<SearchResults />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </main>
-                      <Footer />
-                      <ChatAssistant />
-                    </div>
-                  </BrowserRouter>
-                </TooltipProvider>
-              </WishlistProvider>
-            </CartProvider>
-          </ProductProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        {!isMarketingPage && <><Footer /><ChatAssistant /></>}
+      </div>
+    </>
   );
 };
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <AuthProvider>
+        <ProductProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <TooltipProvider>
+                <Sonner />
+                <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                  <SiteRoutes />
+                </BrowserRouter>
+              </TooltipProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </ProductProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
 
 export default App;
