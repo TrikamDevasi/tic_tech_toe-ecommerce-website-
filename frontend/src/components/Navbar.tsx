@@ -24,7 +24,51 @@ const NAV_STYLES = `
     --nav-radius-btn: 0.5rem;
     --nav-radius-pill: 9999px;
     --nav-transition-snappy: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
-    --nav-font: 'DM Sans', 'Inter', system-ui, sans-serif;
+    --nav-font: 'Plus Jakarta Sans', 'DM Sans', 'Inter', system-ui, sans-serif;
+  }
+
+  html.light .navbar-root,
+  .light .navbar-root {
+    --nav-bg: rgba(255, 255, 255, 0.92);
+    --nav-border: #E2E8F0;
+    --nav-accent: #4F46E5;
+    --nav-border-subtle: #E2E8F0;
+    --nav-icon-hover-bg: #F1F5F9;
+  }
+  html.light .navbar-root .navbar-logo-text .logo-white,
+  .light .navbar-root .navbar-logo-text .logo-white {
+    color: #111827;
+  }
+  html.light .navbar-root .navbar-search-form,
+  .light .navbar-root .navbar-search-form {
+    background: #F0F2F8;
+    border-color: #E2E8F0;
+  }
+  html.light .navbar-root .navbar-search-input,
+  .light .navbar-root .navbar-search-input {
+    color: #111827;
+  }
+  html.light .navbar-root .navbar-search-input::placeholder,
+  .light .navbar-root .navbar-search-input::placeholder {
+    color: #64748B;
+  }
+  html.light .navbar-root .category-tab-btn,
+  .light .navbar-root .category-tab-btn {
+    color: #475569;
+  }
+  html.light .navbar-root .category-tab-btn:hover,
+  .light .navbar-root .category-tab-btn:hover {
+    color: #111827;
+    background: #F1F5F9;
+  }
+  html.light .navbar-root .navbar-icon-btn,
+  .light .navbar-root .navbar-icon-btn {
+    color: #475569;
+  }
+  html.light .navbar-root .navbar-icon-btn:hover,
+  .light .navbar-root .navbar-icon-btn:hover {
+    color: #111827;
+    background: #F1F5F9;
   }
 
   /* ── Scrolled state: blur appears after 60px ── */

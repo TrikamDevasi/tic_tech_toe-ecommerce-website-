@@ -11,6 +11,9 @@ export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
+
+
+    
     const saved = localStorage.getItem("priceiq-theme");
     return saved ? saved === "dark" : true;
   });
@@ -18,6 +21,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     localStorage.setItem("priceiq-theme", isDark ? "dark" : "light");
     document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.classList.toggle("light", !isDark);
   }, [isDark]);
 
   return (
