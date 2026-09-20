@@ -71,6 +71,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       )}
 
+      {/* ML recommendation match confidence badge */}
+      {product._recConfidence !== undefined && product._recConfidence > 0 && (
+        <div className="absolute top-2 left-12 z-10">
+          <span className="flex items-center gap-1 rounded-md bg-blue-600/90 backdrop-blur-sm px-1.5 py-0.5 text-[9px] font-bold text-white shadow-sm">
+            🎯 {product._recConfidence}%
+          </span>
+        </div>
+      )}
+
       {/* Image — white bg, object-contain */}
       <Link to={`/product/${product.id}`} className="block" onClick={() => track("product_click")}>
         <div className="relative overflow-hidden bg-white h-52 flex items-center justify-center">

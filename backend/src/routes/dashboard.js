@@ -29,11 +29,14 @@ router.get('/latency', async (req, res) => {
     // Try to fetch ML metrics from FastAPI
     try {
       const mlUrl = process.env.ML_SERVICE_URL || 'http://localhost:8000';
-      const mlRes = await fetch(`${mlUrl}/evaluate`, { signal: AbortSignal.timeout(2000) });
+      const mlRes = await fetch(`${mlUrl}/evaluate`, { signal: AbortSignal.timeout(2500) });
       if (mlRes.ok) {
         const mlData = await mlRes.json();
-        stats.quality.ndcg = mlData.ndcg_at_10;
-        stats.quality.hitRate = mlData.hit_rate;
+        const gruStats = mlData.models?.GRU4Rec || {};
+        stats.quality.ndcg = mlData.ndcg_at_10 || gruStats['ndcg@10'] || 0;
+        stats.quality.hitRate = mlData.hit_rate || mlData.hit_rate_at_10 || gruStats['hit@10'] || 0;
+        stats.quality.mrr = gruStats.mrr || 0;
+        stats.quality.sampleSize = mlData.test_samples_count || mlData.sample_size || 0;
       }
     } catch (e) {
       // ml service might be down, ignore

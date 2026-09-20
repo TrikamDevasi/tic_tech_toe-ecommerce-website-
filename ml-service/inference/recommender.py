@@ -122,9 +122,9 @@ class HybridRecommender:
         clean_history: List[Any],
         top_k: int = 5,
         exclude_history: bool = True,
-    ) -> List[tuple]:
+    ) -> Dict[str, Any]:
         """
-        Run GRU4Rec inference. Returns list of (canonical_pid, softmax_score).
+        Run GRU4Rec inference with confidence estimation.
         """
         indices = [self.vocab.to_idx(pid) for pid in clean_history]
         if len(indices) > config.MAX_SEQ_LEN:
@@ -133,30 +133,26 @@ class HybridRecommender:
         padded = [config.PAD_IDX] * pad_len + indices
 
         input_tensor = torch.tensor([padded], dtype=torch.long, device=self.device)
+        exclude_indices = set(indices) if exclude_history else set()
 
-        with torch.no_grad():
-            logits = self.model(input_tensor)[0]
-            # Mask special tokens
-            logits[config.PAD_IDX] = -float("inf")
-            logits[config.UNK_IDX] = -float("inf")
-
-            if exclude_history:
-                for pid in clean_history:
-                    idx = self.vocab.to_idx(pid)
-                    if idx >= config.SPECIAL_TOKENS:
-                        logits[idx] = -float("inf")
-
-            probs = torch.softmax(logits, dim=0)
-            k = min(top_k, self.vocab.num_items)
-            top_res = torch.topk(probs, k=k)
-            top_indices = top_res.indices.cpu().tolist()
-            top_scores = top_res.values.cpu().tolist()
+        conf_res = self.model.predict_with_confidence(
+            input_tensor,
+            top_k=top_k,
+            exclude_indices=exclude_indices,
+            confidence_threshold=config.CONFIDENCE_THRESHOLD,
+        )
 
         results = []
-        for idx, score in zip(top_indices, top_scores):
+        for idx, score in zip(conf_res["top_indices"], conf_res["top_probs"]):
             if idx >= config.SPECIAL_TOKENS:
                 results.append((self.vocab.to_id(idx), float(score)))
-        return results
+
+        return {
+            "raw_recs": results,
+            "max_prob": conf_res["max_prob"],
+            "entropy": conf_res["entropy"],
+            "is_low_confidence": conf_res["is_low_confidence"],
+        }
 
     def recommend_session(
         self,
@@ -173,7 +169,7 @@ class HybridRecommender:
             exclude_history: Whether to filter out already viewed products.
 
         Returns:
-            Dict containing recommended items, strategy used, and latency.
+            Dict containing recommended items, strategy used, calibrated confidence, and latency.
         """
         if not self.is_ready:
             self.load()
@@ -191,6 +187,9 @@ class HybridRecommender:
 
         raw_recs = []
         strategy = ""
+        max_prob = 0.0
+        entropy = 0.0
+        is_low_confidence = False
 
         # Step 1: Cold-start Ladder
         if history_len == 0:
@@ -198,6 +197,8 @@ class HybridRecommender:
             strategy = "popularity_cold_start"
             self.stats["popularity_served"] += 1
             raw_recs = self.popularity_model.recommend([], top_k=top_k)
+            max_prob = round(raw_recs[0][1], 4) if raw_recs else 0.05
+            is_low_confidence = False
 
         elif history_len < config.COLD_START_THRESHOLD:
             # 1-2 interactions → TF-IDF Content similarity
@@ -209,24 +210,39 @@ class HybridRecommender:
                 seen_pids = set(clean_history) | {pid for pid, _ in raw_recs}
                 pop_recs = self.popularity_model.recommend(list(seen_pids), top_k=top_k - len(raw_recs))
                 raw_recs.extend(pop_recs)
+            max_prob = round(raw_recs[0][1], 4) if raw_recs else 0.10
+            is_low_confidence = False
 
         else:
             # 3+ interactions → GRU4Rec
             strategy = "gru4rec_neural"
             self.stats["gru4rec_served"] += 1
             try:
-                raw_recs = self._predict_gru4rec(clean_history, top_k=top_k, exclude_history=exclude_history)
+                gru_output = self._predict_gru4rec(clean_history, top_k=top_k, exclude_history=exclude_history)
+                raw_recs = gru_output["raw_recs"]
+                max_prob = gru_output["max_prob"]
+                entropy = gru_output["entropy"]
+                is_low_confidence = gru_output["is_low_confidence"]
             except Exception as e:
                 logger.warning(f"GRU4Rec inference error: {e}. Falling back to content recommender.")
                 self.stats["errors"] += 1
                 strategy = "content_tfidf_fallback"
                 raw_recs = self.content_model.recommend(clean_history, top_k=top_k)
+                max_prob = round(raw_recs[0][1], 4) if raw_recs else 0.05
+                is_low_confidence = True
 
             # Backfill with popularity if needed
             if len(raw_recs) < top_k:
                 seen_pids = set(clean_history) | {pid for pid, _ in raw_recs}
                 pop_recs = self.popularity_model.recommend(list(seen_pids), top_k=top_k - len(raw_recs))
                 raw_recs.extend(pop_recs)
+
+        confidence_pct = round(max_prob * 100, 1)
+        confidence_msg = (
+            "Unable to confidently identify exact next product (confidence < 5%). Serving top category recommendations."
+            if is_low_confidence
+            else f"Calibrated {confidence_pct}% next-item prediction confidence."
+        )
 
         # Step 2: Enrich with catalog product metadata
         items = []
@@ -235,6 +251,7 @@ class HybridRecommender:
             items.append({
                 "productId": pid,
                 "score": round(float(score), 4),
+                "confidencePct": round(float(score) * 100, 1),
                 "name": cat_item.get("name", f"Product #{pid}"),
                 "category": cat_item.get("category", "General"),
                 "price": cat_item.get("price", 0),
@@ -248,6 +265,11 @@ class HybridRecommender:
             "strategy": strategy,
             "session_length": history_len,
             "latency_ms": round(latency_ms, 2),
+            "confidence": max_prob,
+            "confidence_pct": confidence_pct,
+            "is_low_confidence": is_low_confidence,
+            "confidence_message": confidence_msg,
+            "entropy": entropy,
             "recommendations": items,
         }
 

@@ -106,6 +106,7 @@ export async function getRecommendations(sessionId, productId, context = {}, abV
           const data = await mlRes.json();
           if (data.recommendations?.length > 0) {
             const recIds = data.recommendations;
+            const itemsMap = new Map((data.items || []).map(it => [String(it.productId), it]));
             const numericIds = recIds.map(Number).filter(n => !isNaN(n));
             const products = await Product.find({
               $or: [
@@ -114,7 +115,17 @@ export async function getRecommendations(sessionId, productId, context = {}, abV
               ]
             }).limit(8);
             if (products.length > 0) {
-              return products.map(p => ({ ...p.toObject(), _recReason: `ml-${data.model || 'gru4rec'}` }));
+              return products.map(p => {
+                const it = itemsMap.get(String(p.id)) || {};
+                return {
+                  ...p.toObject(),
+                  _recReason: `ml-${data.model || 'gru4rec'}`,
+                  _recStrategy: data.strategy || 'gru4rec_neural',
+                  _recConfidence: it.confidencePct ?? data.confidence_pct ?? 20,
+                  _isLowConfidence: Boolean(data.is_low_confidence),
+                  _confidenceMessage: data.confidence_message || null,
+                };
+              });
             }
           }
         }
@@ -147,11 +158,21 @@ export async function getRecommendations(sessionId, productId, context = {}, abV
         signal: AbortSignal.timeout(1500)
       });
       if (mlRes.ok) {
-        const { recommendations: recIds } = await mlRes.json();
+        const mlData = await mlRes.json();
+        const recIds = mlData.recommendations || [];
+        const itemsMap = new Map((mlData.items || []).map(it => [String(it.productId), it]));
         const recStrSet = new Set((recIds || []).map(String));
         const mlProducts = all.filter(p => recStrSet.has(String(p.id)) && !exclude.has(p.id));
         mlProducts.forEach(p => {
-          result.push({ ...p, _recReason: 'ml-personalized' });
+          const it = itemsMap.get(String(p.id)) || {};
+          result.push({
+            ...p,
+            _recReason: 'ml-personalized',
+            _recStrategy: mlData.strategy || 'gru4rec_neural',
+            _recConfidence: it.confidencePct ?? mlData.confidence_pct ?? 15,
+            _isLowConfidence: Boolean(mlData.is_low_confidence),
+            _confidenceMessage: mlData.confidence_message || null,
+          });
           exclude.add(p.id);
         });
       }

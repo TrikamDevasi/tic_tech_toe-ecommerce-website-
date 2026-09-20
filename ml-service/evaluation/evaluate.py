@@ -5,10 +5,12 @@ Evaluates GRU4Rec and three baseline recommenders (Popularity, Recently Viewed,
 Content/TF-IDF) on the same held-out test split.
 
 Metrics computed:
-  - Hit@5, Hit@10, Hit@20
+  - Hit@1, Hit@5, Hit@10, Hit@20
   - NDCG@5, NDCG@10, NDCG@20
   - MRR (Mean Reciprocal Rank)
+  - Precision@10, Recall@10, F1@10
   - Catalog Coverage
+  - Per-Category Performance Breakdown (weakest vs strongest classes)
   - Inference Latency (ms/query)
 
 Usage:
@@ -38,6 +40,8 @@ from evaluation.metrics import (
     ndcg_at_k,
     mrr_at_k,
     compute_catalog_coverage,
+    precision_recall_f1_at_k,
+    compute_per_category_metrics,
 )
 
 
@@ -47,7 +51,6 @@ def predict_gru4rec(model, prefix_pids, vocab, device, top_k=20, exclude_history
     Returns list of recommended product IDs (canonical ints/strings).
     """
     indices = [vocab.to_idx(pid) for pid in prefix_pids]
-    # Truncate or pad to MAX_SEQ_LEN
     if len(indices) > config.MAX_SEQ_LEN:
         indices = indices[-config.MAX_SEQ_LEN:]
     pad_len = config.MAX_SEQ_LEN - len(indices)
@@ -55,23 +58,15 @@ def predict_gru4rec(model, prefix_pids, vocab, device, top_k=20, exclude_history
 
     input_tensor = torch.tensor([padded], dtype=torch.long, device=device)
 
-    with torch.no_grad():
-        logits = model(input_tensor)[0]  # shape: (vocab_size,)
+    exclude_set = set(indices) if exclude_history else set()
 
-        # Mask special tokens
-        logits[config.PAD_IDX] = -float("inf")
-        logits[config.UNK_IDX] = -float("inf")
-
-        # Mask history items if exclude_history is True
-        if exclude_history:
-            for pid in prefix_pids:
-                idx = vocab.to_idx(pid)
-                if idx >= config.SPECIAL_TOKENS:
-                    logits[idx] = -float("inf")
-
-        k = min(top_k, vocab.num_items)
-        top_indices = torch.topk(logits, k=k).indices.cpu().tolist()
-
+    conf_res = model.predict_with_confidence(
+        input_tensor,
+        top_k=top_k,
+        exclude_indices=exclude_set,
+        temperature=1.0,
+    )
+    top_indices = conf_res["top_indices"]
     recommended_pids = [vocab.to_id(idx) for idx in top_indices if idx >= config.SPECIAL_TOKENS]
     return recommended_pids
 
@@ -98,7 +93,7 @@ def evaluate_models(
         test_path = os.path.join(sequences_dir, "test_sequences.json")
         if not os.path.exists(test_path):
             raise FileNotFoundError(
-                f"Test sequences not found at {test_path}. Run training or build_dataset first."
+                f"Test sequences not found at {test_path}. Run python -m data.build_dataset first."
             )
         with open(test_path, "r") as f:
             test_sequences = json.load(f)
@@ -112,66 +107,68 @@ def evaluate_models(
             train_sequences = []
 
     if vocab is None:
-        vocab = ItemVocabulary()
-        vocab_path = os.path.join(config.MAPPINGS_DIR, "item_vocab.json")
-        if not os.path.exists(vocab_path):
-            raise FileNotFoundError(f"Vocab not found at {vocab_path}.")
-        vocab.load(vocab_path)
+        vocab = ItemVocabulary.from_file()
 
     if catalog is None:
-        db = get_db()
-        catalog = load_product_catalog(db)
+        catalog = load_product_catalog()
 
-    # Load GRU4Rec checkpoint if not provided
+    all_catalog_pids = set(catalog.keys()) if catalog else set(vocab.all_product_ids())
+
+    # 2. Load model if not passed
     if model is None:
         model_path = os.path.join(config.MODEL_DIR, "gru4rec_best.pt")
         if not os.path.exists(model_path):
-            raise FileNotFoundError(f"Trained model not found at {model_path}.")
+            raise FileNotFoundError(
+                f"Model checkpoint not found at {model_path}. Run python -m training.train first."
+            )
         checkpoint = torch.load(model_path, map_location=device, weights_only=True)
-        model = GRU4Rec(vocab_size=len(vocab)).to(device)
+        model = GRU4Rec(
+            vocab_size=len(vocab),
+            embedding_dim=config.EMBEDDING_DIM,
+            hidden_dim=config.HIDDEN_DIM,
+            num_layers=config.NUM_GRU_LAYERS,
+            dropout=config.DROPOUT,
+        ).to(device)
         model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
 
-    # 2. Initialize and fit Baselines
-    print("\n📦 Fitting baseline models on training data...")
-    popularity_model = PopularityRecommender()
-    if train_sequences:
-        popularity_model.train(train_sequences)
+    # 3. Train Baselines on Training Sequences
+    print("\n📦 Initializing Baselines for Comparative Benchmark...")
+    pop_model = PopularityRecommender()
+    pop_model.train(train_sequences)
 
-    recently_viewed_model = RecentlyViewedRecommender()
+    recent_model = RecentlyViewedRecommender()
 
     content_model = ContentRecommender()
     if catalog:
         content_model.train_from_catalog(catalog)
 
-    all_catalog_pids = set(catalog.keys()) if catalog else set(vocab.all_product_ids())
-
-    # 3. Benchmark Models Definition
     models_dict = {
         "GRU4Rec": {
-            "fn": lambda hist: predict_gru4rec(model, hist, vocab, device, top_k=20),
+            "fn": lambda prefix: predict_gru4rec(model, prefix, vocab, device, top_k=20),
             "type": "Neural (Session-based RNN)",
         },
         "Popularity": {
-            "fn": lambda hist: [pid for pid, _ in popularity_model.recommend(hist, top_k=20)],
+            "fn": lambda prefix: [pid for pid, _ in pop_model.recommend(prefix, top_k=20)],
             "type": "Non-personalized Baseline",
         },
         "RecentlyViewed": {
-            "fn": lambda hist: [pid for pid, _ in recently_viewed_model.recommend(hist, top_k=20)],
+            "fn": lambda prefix: [pid for pid, _ in recent_model.recommend(prefix, top_k=20)],
             "type": "Heuristic Baseline",
         },
         "Content_TFIDF": {
-            "fn": lambda hist: [pid for pid, _ in content_model.recommend(hist, top_k=20)],
+            "fn": lambda prefix: [pid for pid, _ in content_model.recommend(prefix, top_k=20)],
             "type": "Content-based Cosine Baseline",
         },
     }
 
-    print(f"\n🚀 Evaluating {len(models_dict)} models on {len(test_sequences)} test sessions...")
-
     # 4. Evaluation Loop
+    print(f"\n🧪 Evaluating on {len(test_sequences)} test sessions...")
+
     results = {
         name: {
             "type": info["type"],
+            "hit@1": [],
             "hit@5": [],
             "hit@10": [],
             "hit@20": [],
@@ -179,8 +176,12 @@ def evaluate_models(
             "ndcg@10": [],
             "ndcg@20": [],
             "mrr": [],
+            "precision@10": [],
+            "recall@10": [],
+            "f1@10": [],
             "latencies_ms": [],
             "all_recommendations": [],
+            "pred_meta": [],
         }
         for name, info in models_dict.items()
     }
@@ -199,7 +200,7 @@ def evaluate_models(
             t0 = time.perf_counter()
             try:
                 recommended = info["fn"](prefix)
-            except Exception as e:
+            except Exception:
                 recommended = []
             latency_ms = (time.perf_counter() - t0) * 1000.0
 
@@ -207,14 +208,29 @@ def evaluate_models(
             m_dict["latencies_ms"].append(latency_ms)
             m_dict["all_recommendations"].append(recommended)
 
-            # Metrics
-            m_dict["hit@5"].append(hit_at_k(recommended, target, k=5))
-            m_dict["hit@10"].append(hit_at_k(recommended, target, k=10))
-            m_dict["hit@20"].append(hit_at_k(recommended, target, k=20))
-            m_dict["ndcg@5"].append(ndcg_at_k(recommended, target, k=5))
-            m_dict["ndcg@10"].append(ndcg_at_k(recommended, target, k=10))
-            m_dict["ndcg@20"].append(ndcg_at_k(recommended, target, k=20))
-            m_dict["mrr"].append(mrr_at_k(recommended, target))
+            # Ranking Metrics
+            h1 = hit_at_k(recommended, target, k=1)
+            h5 = hit_at_k(recommended, target, k=5)
+            h10 = hit_at_k(recommended, target, k=10)
+            h20 = hit_at_k(recommended, target, k=20)
+            n5 = ndcg_at_k(recommended, target, k=5)
+            n10 = ndcg_at_k(recommended, target, k=10)
+            n20 = ndcg_at_k(recommended, target, k=20)
+            mrr = mrr_at_k(recommended, target)
+            p10, r10, f10 = precision_recall_f1_at_k(recommended, target, k=10)
+
+            m_dict["hit@1"].append(h1)
+            m_dict["hit@5"].append(h5)
+            m_dict["hit@10"].append(h10)
+            m_dict["hit@20"].append(h20)
+            m_dict["ndcg@5"].append(n5)
+            m_dict["ndcg@10"].append(n10)
+            m_dict["ndcg@20"].append(n20)
+            m_dict["mrr"].append(mrr)
+            m_dict["precision@10"].append(p10)
+            m_dict["recall@10"].append(r10)
+            m_dict["f1@10"].append(f10)
+            m_dict["pred_meta"].append({"target": target, "recommended": recommended, "hit@10": h10})
 
     # 5. Aggregate metrics
     summary = {
@@ -224,10 +240,10 @@ def evaluate_models(
     }
 
     for model_name, m_dict in results.items():
-        n = max(len(m_dict["hit@10"]), 1)
         coverage = compute_catalog_coverage(m_dict["all_recommendations"], all_catalog_pids)
         summary["models"][model_name] = {
             "type": m_dict["type"],
+            "hit@1": round(float(np.mean(m_dict["hit@1"])), 4),
             "hit@5": round(float(np.mean(m_dict["hit@5"])), 4),
             "hit@10": round(float(np.mean(m_dict["hit@10"])), 4),
             "hit@20": round(float(np.mean(m_dict["hit@20"])), 4),
@@ -235,13 +251,33 @@ def evaluate_models(
             "ndcg@10": round(float(np.mean(m_dict["ndcg@10"])), 4),
             "ndcg@20": round(float(np.mean(m_dict["ndcg@20"])), 4),
             "mrr": round(float(np.mean(m_dict["mrr"])), 4),
+            "precision@10": round(float(np.mean(m_dict["precision@10"])), 4),
+            "recall@10": round(float(np.mean(m_dict["recall@10"])), 4),
+            "f1@10": round(float(np.mean(m_dict["f1@10"])), 4),
             "catalog_coverage": round(coverage, 4),
             "avg_latency_ms": round(float(np.mean(m_dict["latencies_ms"])), 2),
             "p95_latency_ms": round(float(np.percentile(m_dict["latencies_ms"], 95)), 2),
         }
 
+    # Per-category evaluation for GRU4Rec
+    gru_category_metrics = compute_per_category_metrics(results["GRU4Rec"]["pred_meta"], catalog)
+    summary["category_breakdown"] = gru_category_metrics
+
+    # Sort categories by F1 to find strongest and weakest
+    sorted_cats = sorted(gru_category_metrics.items(), key=lambda x: x[1]["avg_f1@10"], reverse=True)
+    summary["strongest_classes"] = [c[0] for c in sorted_cats[:3]]
+    summary["weakest_classes"] = [c[0] for c in sorted_cats[-3:]]
+
+    # Top-level keys for direct backward-compatibility with backend dashboard endpoints
+    gru_stats = summary["models"]["GRU4Rec"]
+    summary["ndcg_at_10"] = gru_stats["ndcg@10"]
+    summary["hit_rate"] = gru_stats["hit@10"]
+    summary["hit_rate_at_10"] = gru_stats["hit@10"]
+    summary["sample_size"] = evaluated_count
+    summary["evaluated_at"] = summary["evaluation_timestamp"]
+
     # 6. Display Formatted Benchmark Table
-    header = f"{'Model':<16} | {'Type':<28} | {'Hit@5':<7} | {'Hit@10':<7} | {'NDCG@10':<8} | {'MRR':<7} | {'Coverage':<9} | {'Latency':<8}"
+    header = f"{'Model':<16} | {'Type':<28} | {'Hit@1':<7} | {'Hit@5':<7} | {'Hit@10':<7} | {'NDCG@10':<8} | {'MRR':<7} | {'F1@10':<7} | {'Coverage':<9} | {'Latency':<8}"
     divider = "-" * len(header)
     print("\n" + divider)
     print(f"🏆 BENCHMARK RESULTS (Evaluated on {evaluated_count} held-out test sequences)")
@@ -251,10 +287,16 @@ def evaluate_models(
 
     for name, stats in summary["models"].items():
         print(
-            f"{name:<16} | {stats['type']:<28} | {stats['hit@5']:<7.4f} | {stats['hit@10']:<7.4f} | "
-            f"{stats['ndcg@10']:<8.4f} | {stats['mrr']:<7.4f} | {stats['catalog_coverage']:<9.4f} | {stats['avg_latency_ms']:<5.1f}ms"
+            f"{name:<16} | {stats['type']:<28} | {stats['hit@1']:<7.4f} | {stats['hit@5']:<7.4f} | {stats['hit@10']:<7.4f} | "
+            f"{stats['ndcg@10']:<8.4f} | {stats['mrr']:<7.4f} | {stats['f1@10']:<7.4f} | {stats['catalog_coverage']:<9.4f} | {stats['avg_latency_ms']:<5.1f}ms"
         )
-    print(divider + "\n")
+    print(divider)
+
+    print("\n📊 Per-Category Performance (GRU4Rec):")
+    for cat, c_metrics in sorted(gru_category_metrics.items(), key=lambda x: -x[1]["hit@10"]):
+        print(f"  • {cat:<18}: Hit@10={c_metrics['hit@10']*100:.1f}%, Hit@5={c_metrics['hit@5']*100:.1f}%, F1={c_metrics['avg_f1@10']:.4f} (N={c_metrics['sample_count']})")
+    print(f"\n  Strongest Categories: {', '.join(summary['strongest_classes'])}")
+    print(f"  Weakest Categories:   {', '.join(summary['weakest_classes'])}\n")
 
     # 7. Save to experiment_results.json
     if output_path is None:

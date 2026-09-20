@@ -50,3 +50,39 @@ def test_catalog_coverage():
     # 3 out of 5 items recommended -> 0.6
     coverage = compute_catalog_coverage(all_recs, catalog)
     assert coverage == 0.6
+
+
+def test_precision_recall_f1():
+    from evaluation.metrics import precision_recall_f1_at_k
+    recs = ["p1", "p2", "p3", "p4", "p5"]
+
+    # Target in top 5, k=5 -> precision=1/5=0.2, recall=1.0, f1=2*0.2*1.0/1.2=0.3333
+    p, r, f1 = precision_recall_f1_at_k(recs, target="p1", k=5)
+    assert p == 0.2
+    assert r == 1.0
+    assert pytest.approx(f1, 0.001) == 1.0 / 3.0
+
+    # Miss
+    p_miss, r_miss, f1_miss = precision_recall_f1_at_k(recs, target="p99", k=5)
+    assert p_miss == 0.0
+    assert r_miss == 0.0
+    assert f1_miss == 0.0
+
+
+def test_per_category_metrics():
+    from evaluation.metrics import compute_per_category_metrics
+    preds = [
+        {"target": 1, "recommended": [1, 2, 3], "hit@10": 1.0},
+        {"target": 2, "recommended": [9, 8, 2], "hit@10": 1.0},
+        {"target": 3, "recommended": [9, 8, 7], "hit@10": 0.0},
+    ]
+    catalog = {
+        1: {"category": "Electronics"},
+        2: {"category": "Electronics"},
+        3: {"category": "Fashion"},
+    }
+    cat_metrics = compute_per_category_metrics(preds, catalog)
+    assert "Electronics" in cat_metrics
+    assert "Fashion" in cat_metrics
+    assert cat_metrics["Electronics"]["hit@10"] == 1.0
+    assert cat_metrics["Fashion"]["hit@10"] == 0.0

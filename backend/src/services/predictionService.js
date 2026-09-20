@@ -29,8 +29,10 @@ export async function getInventoryPredictions() {
 
     const daysToStockout = p.stock / effectiveVelocity;
     
-    // Confidence based on sample size
-    const confidence = dailyVelocity > 5 ? 0.9 : 0.6;
+    // Statistical arrival process confidence: grounded in sample observation count k
+    // Relative precision: 1 - 1/sqrt(k+1) bounded in [0.20, 0.95]
+    const samplePurchases = dailyVelocity || (p.purchaseCount ? Math.min(p.purchaseCount, 30) : 0);
+    const confidence = parseFloat(Math.min(0.95, Math.max(0.20, 1 - 1 / Math.sqrt(samplePurchases + 1))).toFixed(2));
 
     predictions.push({
       productId: p.id,

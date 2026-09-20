@@ -110,3 +110,60 @@ def compute_catalog_coverage(all_recommended_sets: List[List[Any]], catalog_item
 
     recommended_in_catalog = unique_recommended.intersection(catalog_str)
     return len(recommended_in_catalog) / len(catalog_str)
+
+
+def precision_recall_f1_at_k(recommended: List[Any], target: Any, k: int = 10):
+    """
+    Compute Precision@K, Recall@K, and F1@K for next-item prediction (single ground truth).
+    """
+    if not recommended or target is None:
+        return 0.0, 0.0, 0.0
+
+    hit = 1.0 if str(target) in [str(x) for x in recommended[:k]] else 0.0
+    precision = hit / float(k)
+    recall = hit / 1.0  # single ground truth target
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
+    return precision, recall, f1
+
+
+def compute_per_category_metrics(predictions_with_meta: List[dict], catalog: dict):
+    """
+    Compute per-category accuracy, precision@10, recall@10, and F1@10.
+    predictions_with_meta: List of {"target": pid, "recommended": [pids], "hit@10": 1/0}
+    """
+    category_stats = {}
+    for p in predictions_with_meta:
+        target_pid = p["target"]
+        prod_info = catalog.get(target_pid) or catalog.get(str(target_pid)) or {}
+        cat = prod_info.get("category", "Unknown")
+
+        if cat not in category_stats:
+            category_stats[cat] = {"total": 0, "hits@1": 0, "hits@5": 0, "hits@10": 0, "f1_sum": 0.0}
+
+        stats = category_stats[cat]
+        stats["total"] += 1
+        rec = p["recommended"]
+        t_str = str(target_pid)
+        rec_strs = [str(x) for x in rec]
+
+        if t_str in rec_strs[:1]:
+            stats["hits@1"] += 1
+        if t_str in rec_strs[:5]:
+            stats["hits@5"] += 1
+        if t_str in rec_strs[:10]:
+            stats["hits@10"] += 1
+            p10, r10, f1_10 = precision_recall_f1_at_k(rec, target_pid, k=10)
+            stats["f1_sum"] += f1_10
+
+    results = {}
+    for cat, stats in category_stats.items():
+        total = stats["total"]
+        if total > 0:
+            results[cat] = {
+                "sample_count": total,
+                "hit@1": round(stats["hits@1"] / total, 4),
+                "hit@5": round(stats["hits@5"] / total, 4),
+                "hit@10": round(stats["hits@10"] / total, 4),
+                "avg_f1@10": round(stats["f1_sum"] / total, 4),
+            }
+    return results

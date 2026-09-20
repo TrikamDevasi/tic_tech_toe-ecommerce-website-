@@ -33,15 +33,17 @@ TEST_RATIO = 0.15
 
 # ── Model Architecture ──────────────────────────────────────────────────────
 EMBEDDING_DIM = 64
+CATEGORY_EMBEDDING_DIM = 32
 HIDDEN_DIM = 128
-NUM_GRU_LAYERS = 1
-DROPOUT = 0.2
+NUM_GRU_LAYERS = 2
+DROPOUT = 0.25
 
 # ── Training ─────────────────────────────────────────────────────────────────
 BATCH_SIZE = 64
 LEARNING_RATE = 0.001
-EPOCHS = 50
-PATIENCE = 5                 # early-stopping patience (epochs)
+WEIGHT_DECAY = 1e-4
+EPOCHS = 40
+PATIENCE = 6                 # early-stopping patience (epochs)
 RANDOM_SEED = 42
 
 # ── Vocabulary Special Tokens ────────────────────────────────────────────────
@@ -51,13 +53,14 @@ SPECIAL_TOKENS = 2           # PAD + UNK
 
 # ── Synthetic Data ───────────────────────────────────────────────────────────
 SYNTHETIC_NUM_USERS = 500
-SYNTHETIC_NUM_SESSIONS = 2000
-SYNTHETIC_EVENTS_PER_SESSION_RANGE = (3, 15)
+SYNTHETIC_NUM_SESSIONS = 3000
+SYNTHETIC_EVENTS_PER_SESSION_RANGE = (4, 18)
 SYNTHETIC_DAYS_SPAN = 30
 
-# ── Inference ────────────────────────────────────────────────────────────────
+# ── Inference & Confidence ───────────────────────────────────────────────────
 COLD_START_THRESHOLD = 3     # min interactions before using GRU
 TFIDF_THRESHOLD = 1          # min interactions for TF-IDF (1-2 range uses TF-IDF)
+CONFIDENCE_THRESHOLD = 0.05  # minimum softmax probability to be considered high-confidence (>10x uniform)
 
 # ── MongoDB ──────────────────────────────────────────────────────────────────
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://127.0.0.1:27017/priceiq")

@@ -90,7 +90,9 @@ def load_product_catalog(db=None):
     """
     if db is None:
         db = get_db()
-    products = list(db.products.find({}, {"_id": 1, "id": 1, "name": 1, "category": 1, "description": 1}))
+    products = list(db.products.find({}, {
+        "_id": 1, "id": 1, "name": 1, "category": 1, "description": 1, "brand": 1, "livePrice": 1, "price": 1, "rating": 1, "images": 1
+    }))
     catalog = {}
     for p in products:
         pid = p.get("id")
@@ -100,14 +102,18 @@ def load_product_catalog(db=None):
                 "mongo_id": str(p["_id"]),
                 "name": p.get("name", ""),
                 "category": p.get("category", ""),
+                "brand": p.get("brand", ""),
+                "price": p.get("livePrice") or p.get("price", 0),
+                "rating": p.get("rating", 4.0),
+                "image": (p.get("images") or [""])[0],
                 "description": p.get("description", ""),
             }
     return catalog
 
 
-def normalize_product_id(raw_pid, catalog):
+def normalize_product_id(raw_pid, catalog, mongo_id_map=None):
     """
-    Convert any raw productId format to the canonical integer id.
+    Convert any raw productId format to the canonical integer id in O(1) time.
     Handles: int, float, str of int, ObjectId hex strings.
     Returns the canonical int id, or None if unmatchable.
     """
@@ -117,9 +123,7 @@ def normalize_product_id(raw_pid, catalog):
     # Direct int match
     if isinstance(raw_pid, (int, float)):
         pid = int(raw_pid)
-        if pid in catalog:
-            return pid
-        return None
+        return pid if pid in catalog else None
 
     # String handling
     raw_str = str(raw_pid).strip()
@@ -134,7 +138,11 @@ def normalize_product_id(raw_pid, catalog):
     except ValueError:
         pass
 
-    # Try matching against MongoDB ObjectId strings
+    # Fast O(1) lookup by MongoDB ObjectId string
+    if mongo_id_map is not None:
+        return mongo_id_map.get(raw_str)
+
+    # Fallback linear search if map not passed
     for pid, info in catalog.items():
         if info["mongo_id"] == raw_str:
             return pid
@@ -151,6 +159,8 @@ def load_events(db=None, catalog=None):
         db = get_db()
     if catalog is None:
         catalog = load_product_catalog(db)
+
+    mongo_id_map = {info["mongo_id"]: pid for pid, info in catalog.items() if "mongo_id" in info}
 
     report = DataQualityReport()
     event_type_counts = Counter()
@@ -182,7 +192,7 @@ def load_events(db=None, catalog=None):
             continue
 
         # Normalize product ID to canonical int
-        canonical_pid = normalize_product_id(raw_pid, catalog)
+        canonical_pid = normalize_product_id(raw_pid, catalog, mongo_id_map)
         if canonical_pid is None:
             report.unknown_product_events += 1
             report.invalid_events += 1

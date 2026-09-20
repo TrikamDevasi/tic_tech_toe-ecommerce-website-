@@ -31,6 +31,11 @@ export interface Product {
   purchaseCount?: number;
   amazonUrl?: string;
   asin?: string;
+  _recReason?: string;
+  _recStrategy?: string;
+  _recConfidence?: number;
+  _isLowConfidence?: boolean;
+  _confidenceMessage?: string;
 }
 
 export interface MarketplaceFeed {

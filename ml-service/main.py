@@ -132,6 +132,11 @@ def recommend_session(req: SessionRequest):
             "items": res["recommendations"],
             "session_length": res["session_length"],
             "latency_ms": res["latency_ms"],
+            "confidence": res.get("confidence", 0.0),
+            "confidence_pct": res.get("confidence_pct", 0.0),
+            "is_low_confidence": res.get("is_low_confidence", False),
+            "confidence_message": res.get("confidence_message", ""),
+            "entropy": res.get("entropy", 0.0),
         }
     except Exception as e:
         logger.error(f"Error in recommend_session: {e}", exc_info=True)
