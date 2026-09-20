@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import Event from '../models/Event.js';
 import Product from '../models/Product.js';
-import Session from '../models/Session.js';
-import { redisLPush, redisSet, redisGet } from '../config/redis.js';
+import { redisLPush, redisSet, redisGet, redisXAdd } from '../config/redis.js';
 
 const router = Router();
 

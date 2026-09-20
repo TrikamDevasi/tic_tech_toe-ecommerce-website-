@@ -1,0 +1,35 @@
+{
+  "total_epochs": 6,
+  "best_epoch": 1,
+  "best_val_loss": 5.374066,
+  "final_train_loss": 5.266275,
+  "train_losses": [
+    5.376065,
+    5.364512,
+    5.343998,
+    5.317899,
+    5.290789,
+    5.266275
+  ],
+  "val_losses": [
+    5.374066,
+    5.377336,
+    5.391958,
+    5.412379,
+    5.432624,
+    5.453379
+  ],
+  "train_samples": 66685,
+  "val_samples": 14564,
+  "batch_size": 64,
+  "learning_rate": 0.001,
+  "model_config": {
+    "vocab_size": 217,
+    "embedding_dim": 64,
+    "hidden_dim": 128,
+    "num_layers": 1,
+    "dropout": 0.2
+  },
+  "training_time_seconds": 68.36,
+  "device": "cpu"
+}
