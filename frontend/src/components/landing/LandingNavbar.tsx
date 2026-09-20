@@ -1,7 +1,8 @@
-import { Menu, X } from "lucide-react";
+import { Menu, X, Zap, ArrowUpRight, Sun, Moon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { NAV_ITEMS } from "@/landing/claims";
+import { useTheme } from "@/contexts/ThemeContext";
 
 function focusableElements(container: HTMLElement) {
   return Array.from(container.querySelectorAll<HTMLElement>(
@@ -10,13 +11,14 @@ function focusableElements(container: HTMLElement) {
 }
 
 export default function LandingNavbar() {
+  const { isDark, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const update = () => setIsCompact(window.scrollY > 18);
+    const update = () => setIsCompact(window.scrollY > 20);
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
@@ -57,15 +59,41 @@ export default function LandingNavbar() {
     <header className={`landing-nav ${isCompact ? "is-compact" : ""}`}>
       <div className="landing-shell landing-nav__inner">
         <a className="landing-brand" href="#top" aria-label="PriceIQ home">
-          <span className="landing-brand__mark" aria-hidden="true"><i /><i /><i /></span>
+          <span className="landing-brand__mark" aria-hidden="true">
+            <Zap size={18} />
+          </span>
           <span>PriceIQ</span>
         </a>
 
+        <div className="landing-nav__status" aria-label="Engine status">
+          <span className="status-ping" aria-hidden="true" />
+          <span>215 items live · Engine Ready</span>
+        </div>
+
         <nav className="landing-nav__links" aria-label="Primary navigation">
-          {NAV_ITEMS.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
+          {NAV_ITEMS.map(([label, href]) => (
+            <a key={href} href={href}>
+              {label}
+            </a>
+          ))}
         </nav>
 
-        <Link className="landing-nav__cta" to="/shop">Open platform <span aria-hidden="true">↗</span></Link>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="landing-theme-toggle"
+          aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+          title={isDark ? "Switch to light theme" : "Switch to dark theme"}
+        >
+          {isDark ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-indigo-600" />}
+          <span>{isDark ? "Light" : "Dark"}</span>
+        </button>
+
+        <Link className="landing-nav__cta" to="/shop">
+          <span>Open platform</span>
+          <ArrowUpRight size={15} aria-hidden="true" />
+        </Link>
+
         <button
           ref={triggerRef}
           className="landing-menu-button"
@@ -91,12 +119,34 @@ export default function LandingNavbar() {
             onMouseDown={(event) => event.stopPropagation()}
           >
             <div className="landing-drawer__top">
-              <span className="landing-brand"><span className="landing-brand__mark" aria-hidden="true"><i /><i /><i /></span>PriceIQ</span>
-              <button className="landing-menu-button" type="button" onClick={closeDrawer} aria-label="Close navigation menu"><X size={20} /></button>
+              <span className="landing-brand">
+                <span className="landing-brand__mark" aria-hidden="true">
+                  <Zap size={18} />
+                </span>
+                <span>PriceIQ</span>
+              </span>
+              <button className="landing-menu-button" type="button" onClick={closeDrawer} aria-label="Close navigation menu">
+                <X size={20} />
+              </button>
             </div>
             <nav className="landing-drawer__links" aria-label="Mobile navigation">
-              {NAV_ITEMS.map(([label, href]) => <a key={href} href={href} onClick={closeDrawer}>{label}</a>)}
-              <Link to="/shop" onClick={closeDrawer}>Open platform <span aria-hidden="true">↗</span></Link>
+              {NAV_ITEMS.map(([label, href]) => (
+                <a key={href} href={href} onClick={closeDrawer}>
+                  {label}
+                </a>
+              ))}
+              <button
+                type="button"
+                onClick={() => { toggleTheme(); closeDrawer(); }}
+                className="landing-theme-toggle"
+                style={{ width: "100%", justifyContent: "center", padding: "12px" }}
+              >
+                {isDark ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-indigo-600" />}
+                <span>{isDark ? "Switch to Light Theme" : "Switch to Dark Theme"}</span>
+              </button>
+              <Link to="/shop" onClick={closeDrawer} className="landing-button landing-button--primary">
+                Open platform ↗
+              </Link>
             </nav>
             <p className="landing-drawer__note">Press Escape to close</p>
           </div>
