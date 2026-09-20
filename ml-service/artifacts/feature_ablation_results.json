@@ -1,0 +1,29 @@
+{
+  "item_only": {
+    "hit@1": 23.37,
+    "hit@5": 67.21,
+    "hit@10": 79.13,
+    "ndcg@10": 0.5075,
+    "mrr": 0.4169,
+    "train_time_sec": 31.09,
+    "description": "Baseline (Item ID only)"
+  },
+  "item_plus_category": {
+    "hit@1": 24.0,
+    "hit@5": 67.66,
+    "hit@10": 79.32,
+    "ndcg@10": 0.5108,
+    "mrr": 0.4208,
+    "train_time_sec": 31.85,
+    "description": "Variant A (Item ID + Category)"
+  },
+  "item_plus_cat_plus_price": {
+    "hit@1": 23.63,
+    "hit@5": 68.24,
+    "hit@10": 79.86,
+    "ndcg@10": 0.5118,
+    "mrr": 0.4203,
+    "train_time_sec": 28.99,
+    "description": "Variant B (Item ID + Category + Price Tier)"
+  }
+}

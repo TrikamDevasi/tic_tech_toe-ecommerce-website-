@@ -82,6 +82,15 @@ class SessionRequest(BaseModel):
     )
     top_k: int = Field(default=5, ge=1, le=50, description="Number of recommendations requested")
     exclude_history: bool = Field(default=True, description="Exclude items already in session history")
+    category_preference: Optional[str] = Field(
+        default=None,
+        description="Optional category preference used for cold-start category fallback",
+    )
+
+
+class ClickRequest(BaseModel):
+    product_id: Any = Field(..., description="Product ID that user clicked from recommendations")
+    strategy: Optional[str] = Field(default=None, description="Recommendation strategy that generated the item")
 
 
 class TrainRequest(BaseModel):
@@ -109,24 +118,42 @@ def health():
     return recommender.get_status()
 
 
+@app.get("/monitoring/metrics")
+def monitoring_metrics():
+    """Production operational telemetry: requests, strategy distribution, fallback rate, latency, and click tracking."""
+    return recommender.get_telemetry_metrics()
+
+
+@app.post("/monitoring/click")
+def track_click(req: ClickRequest):
+    """Track user clicks on recommendations for online CTR monitoring without collecting personal data."""
+    return recommender.track_click(product_id=req.product_id, strategy=req.strategy)
+
+
 @app.post("/recommend/session")
 def recommend_session(req: SessionRequest):
     """
     Primary recommendation endpoint: generates session-aware recommendations
     using GRU4Rec when session length >= 3, with automatic cold-start fallbacks
-    (TF-IDF content for 1-2 interactions, popularity for 0 interactions).
+    (TF-IDF content for 1-2 interactions, popularity for 0 interactions, unknown product fallback).
+    
+    Explicitly provides `is_fallback: bool` and `fallback_reason: Optional[str]` in metadata.
     """
     try:
         res = recommender.recommend_session(
             session_history=req.session_history,
             top_k=req.top_k,
             exclude_history=req.exclude_history,
+            category_preference=req.category_preference,
         )
 
         rec_ids = [item["productId"] for item in res["recommendations"]]
 
         return {
             "strategy": res["strategy"],
+            "is_fallback": res.get("is_fallback", False),
+            "fallback_reason": res.get("fallback_reason"),
+            "unknown_products_count": res.get("unknown_products_count", 0),
             "model": "gru4rec" if "gru4rec" in res["strategy"] else res["strategy"],
             "recommendations": rec_ids,
             "items": res["recommendations"],

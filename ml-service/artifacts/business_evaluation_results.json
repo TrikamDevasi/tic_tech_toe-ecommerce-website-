@@ -1,0 +1,21 @@
+{
+  "total_test_sessions_evaluated": 449,
+  "total_catalog_size": 215,
+  "unique_items_recommended": 215,
+  "catalog_coverage_pct": 100.0,
+  "mean_distinct_categories_per_list": 1.67,
+  "intra_list_category_diversity_pct": 16.75,
+  "duplicate_recommendation_rate_pct": 0.0,
+  "average_price_delta_inr": 5820.49,
+  "fallback_rate_pct": 0.0,
+  "strategy_distribution": {
+    "gru4rec_neural": 441,
+    "content_tfidf": 8
+  },
+  "latency_metrics_ms": {
+    "mean": 0.86,
+    "p50": 0.82,
+    "p95": 1.27,
+    "p99": 1.66
+  }
+}

@@ -61,6 +61,10 @@ SYNTHETIC_DAYS_SPAN = 30
 COLD_START_THRESHOLD = 3     # min interactions before using GRU
 TFIDF_THRESHOLD = 1          # min interactions for TF-IDF (1-2 range uses TF-IDF)
 CONFIDENCE_THRESHOLD = 0.05  # minimum softmax probability to be considered high-confidence (>10x uniform)
+# Softmax temperature for calibrated confidence reporting at inference time.
+# Fitted on the VALIDATION split (artifacts/calibration_detail.json, T*=3.0 minimizes ECE).
+# Calibrates reported confidence to empirical accuracy without changing rankings.
+INFERENCE_TEMPERATURE = 3.0
 
 # ── MongoDB ──────────────────────────────────────────────────────────────────
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://127.0.0.1:27017/priceiq")

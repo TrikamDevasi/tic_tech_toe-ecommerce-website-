@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from collections import Counter
+from collections import Counter, defaultdict
 
 
 class PopularityRecommender:
@@ -166,3 +166,51 @@ class ContentRecommender:
         Returns list of (product_id, score) tuples.
         """
         return self.recommend([product_id], top_k)
+
+
+class ItemTransitionRecommender:
+    """
+    First-Order Markov Chain recommender.
+    Computes empirical transition probabilities P(next_item | last_item) from training sequences.
+    """
+
+    def __init__(self):
+        self.transitions = defaultdict(Counter)
+        self.trained = False
+
+    def train(self, sequences):
+        self.transitions = defaultdict(Counter)
+        for seq in sequences:
+            pids = seq.get("product_ids", [])
+            for i in range(len(pids) - 1):
+                self.transitions[pids[i]][pids[i + 1]] += 1
+        self.trained = True
+
+    def recommend(self, session_history, top_k=5):
+        if not self.trained or not session_history:
+            return []
+        last_pid = session_history[-1]
+        next_counts = self.transitions.get(last_pid, Counter())
+        if not next_counts:
+            return []
+        total = sum(next_counts.values())
+        excluded = set(session_history)
+        results = []
+        for pid, count in next_counts.most_common():
+            if pid not in excluded:
+                results.append((pid, float(count / total)))
+                if len(results) >= top_k:
+                    break
+        return results
+
+    def get_score_dict(self, session_history):
+        """Return dict of {pid: normalized_prob} for all candidate items."""
+        if not self.trained or not session_history:
+            return {}
+        last_pid = session_history[-1]
+        next_counts = self.transitions.get(last_pid, Counter())
+        if not next_counts:
+            return {}
+        total = sum(next_counts.values())
+        return {pid: count / total for pid, count in next_counts.items()}
+

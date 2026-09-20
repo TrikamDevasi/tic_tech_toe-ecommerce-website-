@@ -1,11 +1,16 @@
 """
-Unit Tests for GRU4Rec Model Architecture
+Unit Tests for GRU4Rec Model Architecture, Baselines, Hybrid, and Calibration
 """
 import pytest
 import torch
 import torch.nn as nn
+import numpy as np
+
 from models.gru4rec import GRU4Rec
 from models.baselines import PopularityRecommender, RecentlyViewedRecommender
+from models.hybrid import HybridRecommender
+from evaluation.calibration import compute_ece
+from data.dataset import ItemVocabulary
 
 
 def test_gru4rec_forward_shape():
@@ -89,3 +94,34 @@ def test_predict_with_confidence():
     # Special tokens (0: PAD, 1: UNK) must not be in top_indices
     assert 0 not in res["top_indices"]
     assert 1 not in res["top_indices"]
+
+
+def test_hybrid_recommender():
+    vocab = ItemVocabulary()
+    vocab.build([101, 102, 103, 104, 105])
+
+    pop = PopularityRecommender()
+    pop.train([{"product_ids": [101, 102, 102, 103]}])
+
+    hybrid = HybridRecommender(
+        gru_model=None,
+        content_model=None,
+        pop_model=pop,
+        vocab=vocab,
+        alpha=0.0,
+        beta=0.0,
+        gamma=1.0,
+    )
+    recs = hybrid.recommend(session_history=[102], top_k=2)
+    assert len(recs) == 2
+    assert recs[0][0] in [101, 103]
+
+
+def test_calibration_ece():
+    confidences = np.array([0.9, 0.8, 0.8, 0.7, 0.2, 0.1])
+    accuracies = np.array([1.0, 1.0, 0.0, 1.0, 0.0, 0.0])
+
+    ece, mce, bins = compute_ece(confidences, accuracies, n_bins=5)
+    assert 0.0 <= ece <= 1.0
+    assert 0.0 <= mce <= 1.0
+    assert len(bins) == 5

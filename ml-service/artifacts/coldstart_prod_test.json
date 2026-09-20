@@ -1,0 +1,312 @@
+{
+  "empty_session": {
+    "strategy": "popularity_cold_start",
+    "session_length": 0,
+    "latency_ms": 0.05,
+    "confidence": 0.009,
+    "confidence_pct": 0.9,
+    "is_low_confidence": false,
+    "confidence_message": "New session (no history): serving globally popular products. Confidence reflects the item's share of all catalog views.",
+    "entropy": 0.0,
+    "recommendations": [
+      {
+        "productId": 111,
+        "score": 193.0,
+        "confidencePct": 19300.0,
+        "name": "Robert Kiyosaki Finance Book Model H111",
+        "category": "Books",
+        "price": 405,
+        "image": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80",
+        "rating": 4.7
+      },
+      {
+        "productId": 110,
+        "score": 189.0,
+        "confidencePct": 18900.0,
+        "name": "Robert Kiyosaki Self-help Book Model G110",
+        "category": "Books",
+        "price": 401,
+        "image": "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=500&q=80",
+        "rating": 3.7
+      },
+      {
+        "productId": 105,
+        "score": 176.0,
+        "confidencePct": 17600.0,
+        "name": "Adidas Dumbbell Set Model B105",
+        "category": "Sports",
+        "price": 7476,
+        "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&q=80",
+        "rating": 4.8
+      },
+      {
+        "productId": 31,
+        "score": 170.0,
+        "confidencePct": 17000.0,
+        "name": "Pioneer Car Wax Model F31",
+        "category": "Automotive",
+        "price": 1428,
+        "image": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80",
+        "rating": 4.3
+      },
+      {
+        "productId": 75,
+        "score": 169.0,
+        "confidencePct": 16900.0,
+        "name": "3M Car Air Freshener Model X75",
+        "category": "Automotive",
+        "price": 333,
+        "image": "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=500&q=80",
+        "rating": 5
+      }
+    ]
+  },
+  "one_item": {
+    "strategy": "content_tfidf",
+    "session_length": 1,
+    "latency_ms": 1.2,
+    "confidence": 0.5938,
+    "confidence_pct": 59.4,
+    "is_low_confidence": false,
+    "confidence_message": "Content (TF-IDF) similarity 59.4% for this session. Score is catalog-similarity, not a calibrated next-item probability.",
+    "entropy": 0.0,
+    "recommendations": [
+      {
+        "productId": 49,
+        "score": 0.5938,
+        "confidencePct": 59.4,
+        "name": "Samsung Smartphone Model X49",
+        "category": "Electronics",
+        "price": 94593,
+        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+        "rating": 4
+      },
+      {
+        "productId": 142,
+        "score": 0.509,
+        "confidencePct": 50.9,
+        "name": "boAt Smartwatch Model M142",
+        "category": "Electronics",
+        "price": 30951,
+        "image": "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=500&q=80",
+        "rating": 4.4
+      },
+      {
+        "productId": 189,
+        "score": 0.509,
+        "confidencePct": 50.9,
+        "name": "Xiaomi Smartwatch Model H189",
+        "category": "Electronics",
+        "price": 3805,
+        "image": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80",
+        "rating": 3.9
+      },
+      {
+        "productId": 95,
+        "score": 0.509,
+        "confidencePct": 50.9,
+        "name": "Dell Smartwatch Model R95",
+        "category": "Electronics",
+        "price": 22328,
+        "image": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80",
+        "rating": 4.8
+      },
+      {
+        "productId": 48,
+        "score": 0.509,
+        "confidencePct": 50.9,
+        "name": "LG Smartwatch Model W48",
+        "category": "Electronics",
+        "price": 14553,
+        "image": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&q=80",
+        "rating": 4.6
+      }
+    ]
+  },
+  "two_items": {
+    "strategy": "content_tfidf",
+    "session_length": 2,
+    "latency_ms": 0.83,
+    "confidence": 0.8219,
+    "confidence_pct": 82.2,
+    "is_low_confidence": false,
+    "confidence_message": "Content (TF-IDF) similarity 82.2% for this session. Score is catalog-similarity, not a calibrated next-item probability.",
+    "entropy": 0.0,
+    "recommendations": [
+      {
+        "productId": 145,
+        "score": 0.8219,
+        "confidencePct": 82.2,
+        "name": "H&M T-Shirt Model P145",
+        "category": "Fashion",
+        "price": 516,
+        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+        "rating": 4.1
+      },
+      {
+        "productId": 192,
+        "score": 0.6603,
+        "confidencePct": 66.0,
+        "name": "Zara T-Shirt Model K192",
+        "category": "Fashion",
+        "price": 780,
+        "image": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&q=80",
+        "rating": 4.5
+      },
+      {
+        "productId": 98,
+        "score": 0.6603,
+        "confidencePct": 66.0,
+        "name": "Nike T-Shirt Model U98",
+        "category": "Fashion",
+        "price": 2009,
+        "image": "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500&q=80",
+        "rating": 4.5
+      },
+      {
+        "productId": 51,
+        "score": 0.6603,
+        "confidencePct": 66.0,
+        "name": "Nike T-Shirt Model Z51",
+        "category": "Fashion",
+        "price": 2599,
+        "image": "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=500&q=80",
+        "rating": 5
+      },
+      {
+        "productId": 52,
+        "score": 0.3582,
+        "confidencePct": 35.8,
+        "name": "H&M Jeans Model A52",
+        "category": "Fashion",
+        "price": 3437,
+        "image": "https://images.unsplash.com/photo-1593359677879-a4bb92f829e1?w=500&q=80",
+        "rating": 3.6
+      }
+    ]
+  },
+  "three_items": {
+    "strategy": "gru4rec_neural",
+    "session_length": 3,
+    "latency_ms": 3.98,
+    "confidence": 0.0186,
+    "confidence_pct": 1.9,
+    "is_low_confidence": true,
+    "confidence_message": "Low-confidence next-item prediction; recommendations are exploratory for this session.",
+    "entropy": 5.1534,
+    "recommendations": [
+      {
+        "productId": 6,
+        "score": 0.0186,
+        "confidencePct": 1.9,
+        "name": "Levi's Running Shoes Model G6",
+        "category": "Fashion",
+        "price": 12652,
+        "image": "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=500&q=80",
+        "rating": 3.5
+      },
+      {
+        "productId": 192,
+        "score": 0.0183,
+        "confidencePct": 1.8,
+        "name": "Zara T-Shirt Model K192",
+        "category": "Fashion",
+        "price": 780,
+        "image": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&q=80",
+        "rating": 4.5
+      },
+      {
+        "productId": 100,
+        "score": 0.0162,
+        "confidencePct": 1.6,
+        "name": "Puma Running Shoes Model W100",
+        "category": "Fashion",
+        "price": 8883,
+        "image": "https://images.unsplash.com/photo-1593359677879-a4bb92f829e1?w=500&q=80",
+        "rating": 4.9
+      },
+      {
+        "productId": 53,
+        "score": 0.0148,
+        "confidencePct": 1.5,
+        "name": "H&M Running Shoes Model B53",
+        "category": "Fashion",
+        "price": 11947,
+        "image": "https://images.unsplash.com/photo-1601944179066-29786cb9d32a?w=500&q=80",
+        "rating": 4.9
+      },
+      {
+        "productId": 142,
+        "score": 0.0147,
+        "confidencePct": 1.5,
+        "name": "boAt Smartwatch Model M142",
+        "category": "Electronics",
+        "price": 30951,
+        "image": "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=500&q=80",
+        "rating": 4.4
+      }
+    ]
+  },
+  "normal_session": {
+    "strategy": "gru4rec_neural",
+    "session_length": 5,
+    "latency_ms": 0.93,
+    "confidence": 0.0234,
+    "confidence_pct": 2.3,
+    "is_low_confidence": true,
+    "confidence_message": "Low-confidence next-item prediction; recommendations are exploratory for this session.",
+    "entropy": 5.1081,
+    "recommendations": [
+      {
+        "productId": 104,
+        "score": 0.0234,
+        "confidencePct": 2.3,
+        "name": "Boldfit Yoga Mat Model A104",
+        "category": "Sports",
+        "price": 903,
+        "image": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500&q=80",
+        "rating": 4.8
+      },
+      {
+        "productId": 198,
+        "score": 0.0228,
+        "confidencePct": 2.3,
+        "name": "Yonex Yoga Mat Model Q198",
+        "category": "Sports",
+        "price": 760,
+        "image": "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=500&q=80",
+        "rating": 4.4
+      },
+      {
+        "productId": 199,
+        "score": 0.0188,
+        "confidencePct": 1.9,
+        "name": "Yonex Dumbbell Set Model R199",
+        "category": "Sports",
+        "price": 8680,
+        "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80",
+        "rating": 3.6
+      },
+      {
+        "productId": 97,
+        "score": 0.0168,
+        "confidencePct": 1.7,
+        "name": "Sony TV Model T97",
+        "category": "Electronics",
+        "price": 153709,
+        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+        "rating": 4.1
+      },
+      {
+        "productId": 105,
+        "score": 0.0135,
+        "confidencePct": 1.4,
+        "name": "Adidas Dumbbell Set Model B105",
+        "category": "Sports",
+        "price": 7476,
+        "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500&q=80",
+        "rating": 4.8
+      }
+    ]
+  }
+}

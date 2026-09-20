@@ -1,0 +1,15 @@
+{
+  "selection": "validation",
+  "best_threshold": 0.0,
+  "val": {
+    "n": 449,
+    "pure_gru_hit10": 0.2272
+  },
+  "test": {
+    "n": 449,
+    "pure_gru_hit10": 0.2405,
+    "fallback_tfidf_hit10": 0.2116,
+    "policy_hit10": 0.2405,
+    "fallback_frac": 0.0
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "timestamp": "2026-09-20 13:59:38",
+  "collections": {
+    "abassignments": 1,
+    "events": 32961,
+    "pricehistories": 6043,
+    "products": 215,
+    "sessions": 3,
+    "users": 3
+  },
+  "catalog": {
+    "total_products": 215,
+    "missing_fields": {},
+    "unique_categories": 12,
+    "category_distribution": {
+      "Gaming": 25,
+      "Toys": 25,
+      "Appliances": 20,
+      "Furniture": 20,
+      "Food & Grocery": 20,
+      "Electronics": 19,
+      "Automotive": 16,
+      "Fashion": 15,
+      "Home & Kitchen": 15,
+      "Sports": 15,
+      "Beauty": 15,
+      "Books": 10
+    },
+    "unique_brands": 61,
+    "price_stats": {
+      "min": 259.0,
+      "max": 153709.0,
+      "median": 3196.0,
+      "mean": 10963.009302325581
+    },
+    "rating_stats": {
+      "min": 3.5,
+      "max": 5.0,
+      "mean": 4.2479069767441855
+    }
+  },
+  "users": [
+    {
+      "id": "69c903127ca59b60d61f9269",
+      "email": "trikam.devasi.cg@outlook.com",
+      "role": "user",
+      "createdAt": "2026-03-29 10:46:42.310000"
+    },
+    {
+      "id": "69c9393b5b8c882d49eb4680",
+      "email": "trikam.devasi.cg@gmail.com",
+      "role": "user",
+      "createdAt": "2026-03-29 14:37:47.370000"
+    },
+    {
+      "id": "69d3893f6da48e3b71a31175",
+      "email": "trikam.devas3i.cg@outlook.com",
+      "role": "user",
+      "createdAt": "2026-04-06 10:21:51.406000"
+    }
+  ],
+  "sessions_collection": [
+    {
+      "sessionId": "09fe34f7-0b39-492d-89fa-a8b16beb0559",
+      "userId": "user_kdssmwdo",
+      "startedAt": "2026-03-29 08:06:22.549000",
+      "lastSeen": "2026-09-16 10:11:45.931000",
+      "engagementScore": 34,
+      "purchaseIntentScore": 0.36,
+      "categoryAffinity": {
+        "Electronics": 3,
+        "Sports": 1
+      },
+      "events_in_db": 0
+    },
+    {
+      "sessionId": "7ae98477-4090-4b9f-8b91-49e5eefe180e",
+      "userId": "user_94glok1p",
+      "startedAt": "2026-09-16 09:44:05.896000",
+      "lastSeen": "2026-09-16 09:44:05.895000",
+      "engagementScore": 1,
+      "purchaseIntentScore": 0.03,
+      "categoryAffinity": {},
+      "events_in_db": 0
+    },
+    {
+      "sessionId": "d9db582c-0439-4069-a1e4-0b41122c152d",
+      "userId": "user_5w41ibdc",
+      "startedAt": "2026-09-16 10:06:55.845000",
+      "lastSeen": "2026-09-16 10:06:55.845000",
+      "engagementScore": 1,
+      "purchaseIntentScore": 0.03,
+      "categoryAffinity": {},
+      "events_in_db": 0
+    }
+  ],
+  "events_collection": {
+    "total_events": 32961,
+    "sources": {
+      "SYNTHETIC": 32961
+    },
+    "event_types": {
+      "page_view": 20531,
+      "wishlist_add": 2993,
+      "add_to_cart": 5608,
+      "purchase": 3829
+    },
+    "total_sessions": 3000,
+    "invalid_product_ids": 0,
+    "timestamps": {
+      "earliest": "2026-08-21 08:03:20.070000",
+      "latest": "2026-09-20 07:55:57.936000"
+    },
+    "session_length_stats": {
+      "mean": 10.987,
+      "median": 11.0,
+      "min": 4,
+      "max": 18
+    }
+  },
+  "real_data_sufficient": false,
+  "organic_events_count": 0,
+  "synthetic_events_count": 32961
+}

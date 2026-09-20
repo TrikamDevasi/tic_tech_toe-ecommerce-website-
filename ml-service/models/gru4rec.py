@@ -44,8 +44,8 @@ class GRU4Rec(nn.Module):
         self.vocab_size = vocab_size
         self.embedding_dim = embedding_dim or config.EMBEDDING_DIM
         self.hidden_dim = hidden_dim or config.HIDDEN_DIM
-        self.num_layers = num_layers or config.NUM_GRU_LAYERS
-        self.dropout_rate = dropout or config.DROPOUT
+        self.num_layers = num_layers if num_layers is not None else config.NUM_GRU_LAYERS
+        self.dropout_rate = dropout if dropout is not None else config.DROPOUT
 
         # Layers
         self.embedding = nn.Embedding(

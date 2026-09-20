@@ -1,0 +1,91 @@
+{
+  "experiment_id": "experiment_004",
+  "description": "Lower Learning Rate (dim=64/128, 2 layers, drop=0.20, lr=5e-4)",
+  "timestamp": "2026-09-20 13:32:53",
+  "parameters": {
+    "id": "experiment_004",
+    "description": "Lower Learning Rate (dim=64/128, 2 layers, drop=0.20, lr=5e-4)",
+    "embedding_dim": 64,
+    "hidden_dim": 128,
+    "num_layers": 2,
+    "dropout": 0.2,
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "max_seq_len": 20,
+    "epochs": 20,
+    "patience": 5
+  },
+  "training_time_seconds": 97.06,
+  "best_epoch": 8,
+  "total_epochs_run": 13,
+  "validation_metrics": {
+    "hit@1": 0.0713,
+    "hit@5": 0.1292,
+    "hit@10": 0.2094,
+    "ndcg@10": 0.1274,
+    "mrr": 0.1071,
+    "sample_count": 449
+  },
+  "history": {
+    "train_loss": [
+      4.6802,
+      3.2509,
+      3.0124,
+      2.9235,
+      2.8735,
+      2.8227,
+      2.7915,
+      2.7518,
+      2.7278,
+      2.7074,
+      2.6703,
+      2.6409,
+      2.61
+    ],
+    "val_loss": [
+      3.3138,
+      2.8407,
+      2.7425,
+      2.7148,
+      2.6852,
+      2.6682,
+      2.6501,
+      2.6251,
+      2.6063,
+      2.609,
+      2.591,
+      2.5756,
+      2.56
+    ],
+    "val_hit10": [
+      0.1849,
+      0.2027,
+      0.2071,
+      0.1982,
+      0.196,
+      0.2049,
+      0.1849,
+      0.2094,
+      0.2049,
+      0.2049,
+      0.1982,
+      0.2071,
+      0.2049
+    ],
+    "val_ndcg10": [
+      0.1015,
+      0.1238,
+      0.1265,
+      0.1215,
+      0.1232,
+      0.1269,
+      0.1188,
+      0.1274,
+      0.1231,
+      0.1253,
+      0.1211,
+      0.1264,
+      0.1207
+    ]
+  }
+}

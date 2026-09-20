@@ -1,0 +1,402 @@
+{
+  "timestamp": "2026-09-20 13:51:41",
+  "leakage_verification": {
+    "session_overlap": 0,
+    "target_leakage": 0,
+    "temporal_leakage": false,
+    "status": "PASSED"
+  },
+  "recently_viewed_investigation": {
+    "overall_repeat_rate": 0.6615,
+    "repeat_count": 297,
+    "discovery_count": 152,
+    "repeat_by_length": {
+      "2-3 items": {
+        "total": 44,
+        "repeat_rate": 0.5
+      },
+      "4-6 items": {
+        "total": 112,
+        "repeat_rate": 0.6071
+      },
+      "7-10 items": {
+        "total": 134,
+        "repeat_rate": 0.6791
+      },
+      "11+ items": {
+        "total": 159,
+        "repeat_rate": 0.7296
+      }
+    },
+    "repeat_by_intent": {
+      "comparison": {
+        "total": 177,
+        "repeat_rate": 0.8757
+      },
+      "complementary": {
+        "total": 100,
+        "repeat_rate": 0.38
+      },
+      "brand_loyalty": {
+        "total": 82,
+        "repeat_rate": 0.8659
+      },
+      "category_discovery": {
+        "total": 65,
+        "repeat_rate": 0.4308
+      },
+      "price_tier": {
+        "total": 25,
+        "repeat_rate": 0.2
+      }
+    },
+    "repeat_by_category": {
+      "Furniture": {
+        "total": 55,
+        "repeat_rate": 0.6909
+      },
+      "Food & Grocery": {
+        "total": 43,
+        "repeat_rate": 0.7209
+      },
+      "Sports": {
+        "total": 43,
+        "repeat_rate": 0.5349
+      },
+      "Beauty": {
+        "total": 43,
+        "repeat_rate": 0.7674
+      },
+      "Toys": {
+        "total": 40,
+        "repeat_rate": 0.55
+      },
+      "Automotive": {
+        "total": 39,
+        "repeat_rate": 0.7692
+      },
+      "Fashion": {
+        "total": 38,
+        "repeat_rate": 0.5789
+      },
+      "Gaming": {
+        "total": 35,
+        "repeat_rate": 0.6
+      },
+      "Appliances": {
+        "total": 33,
+        "repeat_rate": 0.6364
+      },
+      "Electronics": {
+        "total": 32,
+        "repeat_rate": 0.5938
+      },
+      "Books": {
+        "total": 28,
+        "repeat_rate": 0.6786
+      },
+      "Home & Kitchen": {
+        "total": 20,
+        "repeat_rate": 0.9
+      }
+    }
+  },
+  "subset_evaluations": {
+    "repeat_prediction": {
+      "Popularity": {
+        "hit@1": 0.0067,
+        "hit@5": 0.0337,
+        "hit@10": 0.0808,
+        "ndcg@10": 0.0356,
+        "mrr": 0.0224
+      },
+      "RecentlyViewed": {
+        "hit@1": 0.0,
+        "hit@5": 0.899,
+        "hit@10": 0.9966,
+        "ndcg@10": 0.5153,
+        "mrr": 0.3571
+      },
+      "Content_TFIDF": {
+        "hit@1": 0.0,
+        "hit@5": 0.0,
+        "hit@10": 0.0,
+        "ndcg@10": 0.0,
+        "mrr": 0.0
+      },
+      "ItemTransition_Markov": {
+        "hit@1": 0.0,
+        "hit@5": 0.0,
+        "hit@10": 0.0,
+        "ndcg@10": 0.0,
+        "mrr": 0.0
+      },
+      "GRU4Rec": {
+        "hit@1": 0.2929,
+        "hit@5": 0.8519,
+        "hit@10": 0.9226,
+        "ndcg@10": 0.6183,
+        "mrr": 0.5189
+      },
+      "Hybrid": {
+        "hit@1": 0.2559,
+        "hit@5": 0.7542,
+        "hit@10": 0.8889,
+        "ndcg@10": 0.5495,
+        "mrr": 0.4426
+      }
+    },
+    "discovery_prediction": {
+      "Popularity": {
+        "hit@1": 0.0,
+        "hit@5": 0.0329,
+        "hit@10": 0.0592,
+        "ndcg@10": 0.0274,
+        "mrr": 0.0176
+      },
+      "RecentlyViewed": {
+        "hit@1": 0.0,
+        "hit@5": 0.0,
+        "hit@10": 0.0,
+        "ndcg@10": 0.0,
+        "mrr": 0.0
+      },
+      "Content_TFIDF": {
+        "hit@1": 0.1316,
+        "hit@5": 0.4605,
+        "hit@10": 0.625,
+        "ndcg@10": 0.3421,
+        "mrr": 0.2558
+      },
+      "ItemTransition_Markov": {
+        "hit@1": 0.1645,
+        "hit@5": 0.4211,
+        "hit@10": 0.6184,
+        "ndcg@10": 0.3486,
+        "mrr": 0.2674
+      },
+      "GRU4Rec": {
+        "hit@1": 0.0789,
+        "hit@5": 0.3092,
+        "hit@10": 0.5197,
+        "ndcg@10": 0.2668,
+        "mrr": 0.1906
+      },
+      "Hybrid": {
+        "hit@1": 0.0526,
+        "hit@5": 0.3092,
+        "hit@10": 0.4934,
+        "ndcg@10": 0.2349,
+        "mrr": 0.157
+      }
+    }
+  },
+  "fresh_seed_generalization": {
+    "seed": 99999,
+    "sample_count": 449,
+    "metrics": {
+      "Popularity": {
+        "hit@1": 0.0067,
+        "hit@5": 0.0223,
+        "hit@10": 0.0579,
+        "ndcg@10": 0.0271,
+        "mrr": 0.0181
+      },
+      "RecentlyViewed": {
+        "hit@1": 0.0,
+        "hit@5": 0.5902,
+        "hit@10": 0.6459,
+        "ndcg@10": 0.3317,
+        "mrr": 0.2289
+      },
+      "Content_TFIDF": {
+        "hit@1": 0.0356,
+        "hit@5": 0.1403,
+        "hit@10": 0.2116,
+        "ndcg@10": 0.1104,
+        "mrr": 0.0797
+      },
+      "ItemTransition_Markov": {
+        "hit@1": 0.0401,
+        "hit@5": 0.147,
+        "hit@10": 0.216,
+        "ndcg@10": 0.1137,
+        "mrr": 0.0826
+      },
+      "GRU4Rec": {
+        "hit@1": 0.245,
+        "hit@5": 0.6437,
+        "hit@10": 0.7617,
+        "ndcg@10": 0.5006,
+        "mrr": 0.4174
+      },
+      "Hybrid": {
+        "hit@1": 0.1982,
+        "hit@5": 0.588,
+        "hit@10": 0.735,
+        "ndcg@10": 0.4416,
+        "mrr": 0.3503
+      }
+    }
+  },
+  "intent_breakdown": {
+    "comparison": {
+      "GRU4Rec": {
+        "hit@1": 0.3616,
+        "hit@10": 1.0,
+        "ndcg@10": 0.7099
+      },
+      "Hybrid": {
+        "hit@1": 0.322,
+        "hit@10": 1.0,
+        "ndcg@10": 0.6529
+      },
+      "RecentlyViewed": {
+        "hit@1": 0.0,
+        "hit@10": 0.8757,
+        "ndcg@10": 0.4699
+      },
+      "Content_TFIDF": {
+        "hit@1": 0.0339,
+        "hit@10": 0.1243,
+        "ndcg@10": 0.0793
+      },
+      "ItemTransition_Markov": {
+        "hit@1": 0.0847,
+        "hit@10": 0.1243,
+        "ndcg@10": 0.1071
+      }
+    },
+    "complementary": {
+      "GRU4Rec": {
+        "hit@1": 0.05,
+        "hit@10": 0.54,
+        "ndcg@10": 0.2579
+      },
+      "Hybrid": {
+        "hit@1": 0.01,
+        "hit@10": 0.45,
+        "ndcg@10": 0.1709
+      },
+      "RecentlyViewed": {
+        "hit@1": 0.0,
+        "hit@10": 0.37,
+        "ndcg@10": 0.1687
+      },
+      "Content_TFIDF": {
+        "hit@1": 0.04,
+        "hit@10": 0.33,
+        "ndcg@10": 0.1501
+      },
+      "ItemTransition_Markov": {
+        "hit@1": 0.04,
+        "hit@10": 0.37,
+        "ndcg@10": 0.1652
+      }
+    },
+    "brand_loyalty": {
+      "GRU4Rec": {
+        "hit@1": 0.2927,
+        "hit@10": 0.939,
+        "ndcg@10": 0.6294
+      },
+      "Hybrid": {
+        "hit@1": 0.2683,
+        "hit@10": 1.0,
+        "ndcg@10": 0.6143
+      },
+      "RecentlyViewed": {
+        "hit@1": 0.0,
+        "hit@10": 0.8659,
+        "ndcg@10": 0.4711
+      },
+      "Content_TFIDF": {
+        "hit@1": 0.0732,
+        "hit@10": 0.1341,
+        "ndcg@10": 0.1008
+      },
+      "ItemTransition_Markov": {
+        "hit@1": 0.0122,
+        "hit@10": 0.122,
+        "ndcg@10": 0.058
+      }
+    },
+    "category_discovery": {
+      "GRU4Rec": {
+        "hit@1": 0.0923,
+        "hit@10": 0.6,
+        "ndcg@10": 0.295
+      },
+      "Hybrid": {
+        "hit@1": 0.0615,
+        "hit@10": 0.5077,
+        "ndcg@10": 0.2269
+      },
+      "RecentlyViewed": {
+        "hit@1": 0.0,
+        "hit@10": 0.4308,
+        "ndcg@10": 0.1907
+      },
+      "Content_TFIDF": {
+        "hit@1": 0.0308,
+        "hit@10": 0.4154,
+        "ndcg@10": 0.1953
+      },
+      "ItemTransition_Markov": {
+        "hit@1": 0.0769,
+        "hit@10": 0.3692,
+        "ndcg@10": 0.1897
+      }
+    },
+    "price_tier": {
+      "GRU4Rec": {
+        "hit@1": 0.0,
+        "hit@10": 0.24,
+        "ndcg@10": 0.0787
+      },
+      "Hybrid": {
+        "hit@1": 0.0,
+        "hit@10": 0.08,
+        "ndcg@10": 0.0452
+      },
+      "RecentlyViewed": {
+        "hit@1": 0.0,
+        "hit@10": 0.2,
+        "ndcg@10": 0.0791
+      },
+      "Content_TFIDF": {
+        "hit@1": 0.08,
+        "hit@10": 0.08,
+        "ndcg@10": 0.08
+      },
+      "ItemTransition_Markov": {
+        "hit@1": 0.0,
+        "hit@10": 0.04,
+        "ndcg@10": 0.0172
+      }
+    }
+  },
+  "sequential_ablation": {
+    "original_structured": {
+      "hit@1": 0.2205,
+      "hit@5": 0.6682,
+      "hit@10": 0.7862,
+      "ndcg@10": 0.4993,
+      "mrr": 0.4077
+    },
+    "shuffled_prefix_order": {
+      "hit@1": 0.147,
+      "hit@5": 0.6214,
+      "hit@10": 0.7372,
+      "ndcg@10": 0.4213,
+      "mrr": 0.3217
+    },
+    "random_catalog_sequences": {
+      "hit@1": 0.0156,
+      "hit@5": 0.0334,
+      "hit@10": 0.0557,
+      "ndcg@10": 0.0313,
+      "mrr": 0.024
+    }
+  }
+}

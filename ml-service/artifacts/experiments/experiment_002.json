@@ -1,0 +1,63 @@
+{
+  "experiment_id": "experiment_002",
+  "description": "High Capacity Network (dim=128/256, 2 layers, drop=0.30, lr=1e-3)",
+  "timestamp": "2026-09-20 13:30:28",
+  "parameters": {
+    "id": "experiment_002",
+    "description": "High Capacity Network (dim=128/256, 2 layers, drop=0.30, lr=1e-3)",
+    "embedding_dim": 128,
+    "hidden_dim": 256,
+    "num_layers": 2,
+    "dropout": 0.3,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "max_seq_len": 20,
+    "epochs": 20,
+    "patience": 5
+  },
+  "training_time_seconds": 63.75,
+  "best_epoch": 1,
+  "total_epochs_run": 6,
+  "validation_metrics": {
+    "hit@1": 0.0601,
+    "hit@5": 0.1314,
+    "hit@10": 0.2116,
+    "ndcg@10": 0.1214,
+    "mrr": 0.0979,
+    "sample_count": 449
+  },
+  "history": {
+    "train_loss": [
+      3.9461,
+      3.0907,
+      2.936,
+      2.8374,
+      2.7481,
+      2.6702
+    ],
+    "val_loss": [
+      2.9024,
+      2.7772,
+      2.7138,
+      2.6792,
+      2.6139,
+      2.604
+    ],
+    "val_hit10": [
+      0.2116,
+      0.1915,
+      0.1915,
+      0.2049,
+      0.2071,
+      0.2027
+    ],
+    "val_ndcg10": [
+      0.1214,
+      0.1139,
+      0.1168,
+      0.1226,
+      0.1302,
+      0.1231
+    ]
+  }
+}
